@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>二维码生成器</title>
+  <style>
+    /* 全局样式重置 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* CSS变量定义 */
+    :root {
+      --primary-color: #4f46e5;
+      --primary-hover: #4338ca;
+      --secondary-color: #10b981;
+      --secondary-hover: #059669;
+      --danger-color: #ef4444;
+      --danger-hover: #dc2626;
+      --background-color: #f9fafb;
+      --card-background: #ffffff;
+      --text-primary: #1f2937;
+      --text-secondary: #6b7280;
+      --border-color: #e5e7eb;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --border-radius: 8px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    /* 基础样式 */
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-primary);
+      line-height: 1.6;
+      padding: 20px;
+    }
+
+    /* 容器样式 */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* 头部样式 */
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 20px;
+      background-color: var(--card-background);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-sm);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+    }
+
+    /* 主内容区样式 */
+    .main-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    /* 控制面板样式 */
+    .control-panel {
+      background-color: var(--card-background);
+      padding: 30px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-md);
+    }
+
+    .control-section {
+      margin-bottom: 25px;
+    }
+
+    .control-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .control-section h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .control-section h2::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 20px;
+      background-color: var(--primary-color);
+      border-radius: 2px;
+    }
+
+    /* 表单元素样式 */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--border-color);
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      transition: var(--transition);
+      background-color: var(--card-background);
+      color: var(--text-primary);
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    /* 按钮样式 */
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-secondary {
+      background-color: var(--secondary-color);
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--secondary-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background-color: var(--danger-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    /* 二维码展示区样式 */
+    .qrcode-display {
+      background-color: var(--card-background);
+      padding: 30px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-md);
+    }
+
+    .qrcode-tabs {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .tab-btn {
+      padding: 12px 24px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      color: var(--text-secondary);
+    }
+
+    .tab-btn.active {
+      color: var(--primary-color);
+      border-bottom-color: var(--primary-color);
+    }
+
+    .tab-btn:hover {
+      color: var(--primary-color);
+    }
+
+    .qrcode-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 300px;
+      background-color: var(--background-color);
+      border-radius: var(--border-radius);
+      padding: 20px;
+      margin-bottom: 20px;
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .qrcode-container img,
+    .qrcode-container svg,
+    .qrcode-container canvas {
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-lg);
+      transition: var(--transition);
+    }
+
+    .qrcode-container img:hover,
+    .qrcode-container svg:hover,
+    .qrcode-container canvas:hover {
+      transform: scale(1.02);
+      box-shadow: var(--shadow-lg);
+    }
+
+    /* 导出按钮样式 */
+    .export-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* 颜色选择器样式 */
+    .color-picker-group {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .color-picker {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .color-input {
+      width: 50px;
+      height: 40px;
+      border: 2px solid var(--border-color);
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .color-input:hover {
+      border-color: var(--primary-color);
+      transform: scale(1.05);
+    }
+
+    /* 滑块样式 */
+    .slider-group {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .slider {
+      flex: 1;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--border-color);
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .slider::-webkit-slider-thumb:hover {
+      background: var(--primary-hover);
+      transform: scale(1.2);
+    }
+
+    .slider-value {
+      min-width: 60px;
+      text-align: center;
+      font-weight: 500;
+      color: var(--primary-color);
+    }
+
+    /* 下拉选择框样式 */
+    .select-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--border-color);
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      background-color: var(--card-background);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .select-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    /* 数据类型选项卡 */
+    .data-type-tabs {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .data-type-tab {
+      padding: 10px 20px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      color: var(--text-secondary);
+    }
+
+    .data-type-tab.active {
+      color: var(--primary-color);
+      border-bottom-color: var(--primary-color);
+    }
+
+    .data-type-tab:hover {
+      color: var(--primary-color);
+    }
+
+    /* 联系方式表单 */
+    .contact-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .contact-form .form-group {
+      margin-bottom: 15px;
+    }
+
+    /* Logo上传 */
+    .logo-upload {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo-upload input[type="file"] {
+      display: none;
+    }
+
+    .logo-upload label {
+      padding: 10px 20px;
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 0.9rem;
+    }
+
+    .logo-upload label:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .logo-preview {
+      max-width: 80px;
+      max-height: 80px;
+      border-radius: var(--border-radius);
+      border: 2px solid var(--border-color);
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      .main-content {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .control-panel,
+      .qrcode-display {
+        padding: 20px;
+      }
+
+      .btn-group {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .color-picker-group {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .slider-group {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .slider {
+        width: 100%;
+      }
+
+      .contact-form {
+        grid-template-columns: 1fr;
+      }
+
+      .logo-upload {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    /* 加载动画 */
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 300px;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid var(--border-color);
+      border-top-color: var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* 成功/错误消息样式 */
+    .message {
+      padding: 12px 16px;
+      border-radius: var(--border-radius);
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+
+    .message.success {
+      background-color: rgba(16, 185, 129, 0.1);
+      color: var(--secondary-color);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .message.error {
+      background-color: rgba(239, 68, 68, 0.1);
+      color: var(--danger-color);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* 页脚样式 */
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>二维码生成器</h1>
+      <p class="subtitle">快速创建自定义二维码，支持多种数据类型和样式</p>
+    </header>
+
+    <div class="main-content">
+      <!-- 控制面板 -->
+      <div class="control-panel">
+        <div class="control-section">
+          <h2>数据类型</h2>
+          <div class="data-type-tabs">
+            <button class="data-type-tab active" data-type="text">文本/URL</button>
+            <button class="data-type-tab" data-type="contact">联系方式</button>
+            <button class="data-type-tab" data-type="wifi">WiFi</button>
+          </div>
+          
+          <!-- 文本/URL输入 -->
+          <div id="text-input-section" class="input-section">
+            <div class="form-group">
+              <label class="form-label" for="text-input">输入文本或URL</label>
+              <input 
+                type="text" 
+                id="text-input" 
+                class="form-input" 
+                value="https://example.com" 
+                placeholder="请输入文本或URL..."
+              >
+            </div>
+          </div>
+          
+          <!-- 联系方式输入 -->
+          <div id="contact-input-section" class="input-section" style="display: none;">
+            <div class="contact-form">
+              <div class="form-group">
+                <label class="form-label" for="contact-name">姓名</label>
+                <input type="text" id="contact-name" class="form-input" placeholder="请输入姓名">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="contact-phone">电话</label>
+                <input type="tel" id="contact-phone" class="form-input" placeholder="请输入电话号码">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="contact-email">邮箱</label>
+                <input type="email" id="contact-email" class="form-input" placeholder="请输入邮箱地址">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="contact-company">公司</label>
+                <input type="text" id="contact-company" class="form-input" placeholder="请输入公司名称">
+              </div>
+            </div>
+          </div>
+          
+          <!-- WiFi输入 -->
+          <div id="wifi-input-section" class="input-section" style="display: none;">
+            <div class="form-group">
+              <label class="form-label" for="wifi-ssid">WiFi名称 (SSID)</label>
+              <input type="text" id="wifi-ssid" class="form-input" placeholder="请输入WiFi名称">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="wifi-password">WiFi密码</label>
+              <input type="password" id="wifi-password" class="form-input" placeholder="请输入WiFi密码">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="wifi-type">加密类型</label>
+              <select id="wifi-type" class="select-input">
+                <option value="WPA">WPA/WPA2</option>
+                <option value="WEP">WEP</option>
+                <option value="">无加密</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="control-section">
+          <h2>外观设置</h2>
+          
+          <div class="form-group">
+            <label class="form-label" for="size-slider">尺寸: <span id="size-value">200</span>px</label>
+            <div class="slider-group">
+              <input 
+                type="range" 
+                id="size-slider" 
+                class="slider" 
+                min="100" 
+                max="500" 
+                value="200"
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="margin-slider">边距: <span id="margin-value">4</span></label>
+            <div class="slider-group">
+              <input 
+                type="range" 
+                id="margin-slider" 
+                class="slider" 
+                min="0" 
+                max="20" 
+                value="4"
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">颜色设置</label>
+            <div class="color-picker-group">
+              <div class="color-picker">
+                <span>前景色:</span>
+                <input 
+                  type="color" 
+                  id="dark-color" 
+                  class="color-input" 
+                  value="#000000"
+                >
+              </div>
+              <div class="color-picker">
+                <span>背景色:</span>
+                <input 
+                  type="color" 
+                  id="light-color" 
+                  class="color-input" 
+                  value="#ffffff"
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="error-correction">容错级别</label>
+            <select id="error-correction" class="select-input">
+              <option value="L">低 (7%)</option>
+              <option value="M" selected>中 (15%)</option>
+              <option value="Q">中高 (25%)</option>
+              <option value="H">高 (30%)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">中心Logo</label>
+            <div class="logo-upload">
+              <input type="file" id="logo-upload" accept="image/*">
+              <label for="logo-upload">上传Logo</label>
+              <img id="logo-preview" class="logo-preview" src="" alt="Logo预览" style="display: none;">
+              <button id="remove-logo" class="btn btn-danger" style="display: none; padding: 8px 16px; font-size: 0.8rem;">移除</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button id="generate-btn" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <path d="M21 15l-5-5L5 21"></path>
+            </svg>
+            生成二维码
+          </button>
+          <button id="clear-btn" class="btn btn-danger">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+            清空
+          </button>
+        </div>
+      </div>
+
+      <!-- 二维码展示区 -->
+      <div class="qrcode-display">
+        <div class="qrcode-tabs">
+          <button class="tab-btn active" data-tab="png">PNG</button>
+          <button class="tab-btn" data-tab="svg">SVG</button>
+          <button class="tab-btn" data-tab="canvas">Canvas</button>
+        </div>
+
+        <div class="qrcode-container" id="qrcode-container">
+          <img id="qrcode-png" alt="二维码 PNG">
+          <div id="qrcode-svg" style="display: none;"></div>
+          <canvas id="qrcode-canvas" style="display: none;"></canvas>
+        </div>
+
+        <div class="export-buttons">
+          <div class="form-group" style="width: 100%;">
+            <label class="form-label" for="export-format">导出格式</label>
+            <select id="export-format" class="select-input">
+              <option value="png">PNG</option>
+              <option value="jpg">JPG</option>
+              <option value="svg">SVG</option>
+            </select>
+          </div>
+          <button id="export-btn" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            导出二维码
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>&copy; 2025 二维码生成器. 保留所有权利.</p>
+    </footer>
+  </div>
+
+  <!-- 引入qrcode库 -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <!-- 引入我们的QRCodeGenerator组件 -->
+  <script type="module">
+    // 从父目录导入组件
+    import { QRCodeGenerator } from '../dist/qrcode-generator.es.js';
+    import { ErrorCorrectionLevel } from '../dist/types/types.js';
+
+    // 初始化DOM元素
+    const textInput = document.getElementById('text-input');
+    const generateBtn = document.getElementById('generate-btn');
+    const clearBtn = document.getElementById('clear-btn');
+    const qrcodePng = document.getElementById('qrcode-png');
+    const qrcodeSvg = document.getElementById('qrcode-svg');
+    const qrcodeCanvas = document.getElementById('qrcode-canvas');
+    const exportBtn = document.getElementById('export-btn');
+    const exportFormat = document.getElementById('export-format');
+    
+    // 数据类型相关元素
+    const dataTypeTabs = document.querySelectorAll('.data-type-tab');
+    const textInputSection = document.getElementById('text-input-section');
+    const contactInputSection = document.getElementById('contact-input-section');
+    const wifiInputSection = document.getElementById('wifi-input-section');
+    
+    // 联系方式表单元素
+    const contactName = document.getElementById('contact-name');
+    const contactPhone = document.getElementById('contact-phone');
+    const contactEmail = document.getElementById('contact-email');
+    const contactCompany = document.getElementById('contact-company');
+    
+    // WiFi表单元素
+    const wifiSsid = document.getElementById('wifi-ssid');
+    const wifiPassword = document.getElementById('wifi-password');
+    const wifiType = document.getElementById('wifi-type');
+    
+    // 控制面板元素
+    const sizeSlider = document.getElementById('size-slider');
+    const sizeValue = document.getElementById('size-value');
+    const marginSlider = document.getElementById('margin-slider');
+    const marginValue = document.getElementById('margin-value');
+    const darkColor = document.getElementById('dark-color');
+    const lightColor = document.getElementById('light-color');
+    const errorCorrection = document.getElementById('error-correction');
+    
+    // Logo上传元素
+    const logoUpload = document.getElementById('logo-upload');
+    const logoPreview = document.getElementById('logo-preview');
+    const removeLogoBtn = document.getElementById('remove-logo');
+    
+    // 选项卡元素
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    
+    // 当前激活的选项卡
+    let activeTab = 'png';
+    
+    // 当前数据类型
+    let currentDataType = 'text';
+    
+    // 保存当前配置
+    let currentConfig = {
+      size: 200,
+      margin: 4,
+      color: {
+        dark: '#000000',
+        light: '#ffffff'
+      },
+      errorCorrectionLevel: ErrorCorrectionLevel.MEDIUM
+    };
+    
+    // 显示加载状态
+    function showLoading() {
+      generateBtn.disabled = true;
+      generateBtn.innerHTML = `
+        <div class="spinner" style="width: 16px; height: 16px; border-width: 2px;"></div>
+        生成中...
+      `;
+    }
+    
+    // 隐藏加载状态
+    function hideLoading() {
+      generateBtn.disabled = false;
+      generateBtn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <path d="M21 15l-5-5L5 21"></path>
+        </svg>
+        生成二维码
+      `;
+    }
+    
+    // 更新选项卡显示
+    function updateTabDisplay() {
+      // 隐藏所有二维码元素
+      qrcodePng.style.display = 'none';
+      qrcodeSvg.style.display = 'none';
+      qrcodeCanvas.style.display = 'none';
+      
+      // 显示当前选项卡的二维码
+      switch (activeTab) {
+        case 'png':
+          qrcodePng.style.display = 'block';
+          break;
+        case 'svg':
+          qrcodeSvg.style.display = 'block';
+          break;
+        case 'canvas':
+          qrcodeCanvas.style.display = 'block';
+          break;
+      }
+    }
+    
+    // 获取当前输入的数据
+    function getCurrentData() {
+      switch (currentDataType) {
+        case 'text':
+          return textInput.value.trim();
+        
+        case 'contact':
+          // 生成vCard格式
+          let vCard = 'BEGIN:VCARD\nVERSION:3.0\n';
+          if (contactName.value.trim()) {
+            vCard += `FN:${contactName.value.trim()}\n`;
+          }
+          if (contactPhone.value.trim()) {
+            vCard += `TEL:${contactPhone.value.trim()}\n`;
+          }
+          if (contactEmail.value.trim()) {
+            vCard += `EMAIL:${contactEmail.value.trim()}\n`;
+          }
+          if (contactCompany.value.trim()) {
+            vCard += `ORG:${contactCompany.value.trim()}\n`;
+          }
+          vCard += 'END:VCARD';
+          return vCard;
+        
+        case 'wifi':
+          // 生成WiFi格式
+          let wifiData = `WIFI:T:${wifiType.value};S:${wifiSsid.value.trim()};`;
+          if (wifiPassword.value.trim()) {
+            wifiData += `P:${wifiPassword.value.trim()};`;
+          }
+          wifiData += ';';
+          return wifiData;
+        
+        default:
+          return textInput.value.trim();
+      }
+    }
+    
+    // 生成二维码
+    async function generateQRCode() {
+      const data = getCurrentData();
+      if (!data) {
+        alert('请输入数据');
+        return;
+      }
+      
+      showLoading();
+      
+      try {
+        // 更新当前配置
+        currentConfig = {
+          size: parseInt(sizeSlider.value),
+          margin: parseInt(marginSlider.value),
+          color: {
+            dark: darkColor.value,
+            light: lightColor.value
+          },
+          errorCorrectionLevel: errorCorrection.value,
+          logo: logoPreview.src ? {
+            src: logoPreview.src,
+            size: parseInt(sizeSlider.value) * 0.2
+          } : undefined
+        };
+        
+        // 生成PNG
+        const pngResult = await QRCodeGenerator.generateQRCode(data, currentConfig);
+        qrcodePng.src = pngResult.dataURL;
+        
+        // 生成SVG
+        const svgString = await QRCodeGenerator.exportAsSVG(data, currentConfig);
+        qrcodeSvg.innerHTML = svgString;
+        
+        // 渲染到Canvas
+        await QRCodeGenerator.renderToCanvas(data, qrcodeCanvas, currentConfig);
+        
+        // 更新选项卡显示
+        updateTabDisplay();
+      } catch (error) {
+        console.error('生成二维码失败:', error);
+        alert('生成二维码失败: ' + (error instanceof Error ? error.message : '未知错误'));
+      } finally {
+        hideLoading();
+      }
+    }
+    
+    // 导出二维码
+    async function exportQRCode() {
+      const data = getCurrentData();
+      if (!data) {
+        alert('请输入数据');
+        return;
+      }
+      
+      try {
+        const format = exportFormat.value;
+        
+        switch (format) {
+          case 'png':
+            await QRCodeGenerator.exportAsPNG(data, currentConfig, {
+              fileName: 'qrcode.png'
+            });
+            break;
+          case 'jpg':
+            // 由于qrcode库不直接支持JPG，我们需要从Canvas转换
+            await QRCodeGenerator.renderToCanvas(data, qrcodeCanvas, currentConfig);
+            const jpgDataURL = qrcodeCanvas.toDataURL('image/jpeg', 0.9);
+            downloadFile(jpgDataURL, 'qrcode.jpg');
+            break;
+          case 'svg':
+            await QRCodeGenerator.exportAsSVG(data, currentConfig, {
+              fileName: 'qrcode.svg'
+            });
+            break;
+          default:
+            await QRCodeGenerator.exportAsPNG(data, currentConfig, {
+              fileName: 'qrcode.png'
+            });
+        }
+      } catch (error) {
+        console.error('导出二维码失败:', error);
+        alert('导出二维码失败: ' + (error instanceof Error ? error.message : '未知错误'));
+      }
+    }
+    
+    // 下载文件
+    function downloadFile(dataURL, fileName) {
+      const link = document.createElement('a');
+      link.href = dataURL;
+      link.download = fileName;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+    
+    // 清除输入和二维码
+    function clear() {
+      // 清除文本输入
+      textInput.value = '';
+      
+      // 清除联系方式
+      contactName.value = '';
+      contactPhone.value = '';
+      contactEmail.value = '';
+      contactCompany.value = '';
+      
+      // 清除WiFi信息
+      wifiSsid.value = '';
+      wifiPassword.value = '';
+      wifiType.value = 'WPA';
+      
+      // 清除二维码
+      qrcodePng.src = '';
+      qrcodeSvg.innerHTML = '';
+      qrcodeCanvas.getContext('2d').clearRect(0, 0, qrcodeCanvas.width, qrcodeCanvas.height);
+      
+      // 清除Logo
+      removeLogo();
+    }
+    
+    // 切换数据类型
+    function switchDataType(type) {
+      currentDataType = type;
+      
+      // 更新选项卡状态
+      dataTypeTabs.forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.dataset.type === type) {
+          tab.classList.add('active');
+        }
+      });
+      
+      // 显示对应的输入区域
+      textInputSection.style.display = type === 'text' ? 'block' : 'none';
+      contactInputSection.style.display = type === 'contact' ? 'block' : 'none';
+      wifiInputSection.style.display = type === 'wifi' ? 'block' : 'none';
+      
+      // 重新生成二维码
+      generateQRCode();
+    }
+    
+    // Logo上传处理
+    function handleLogoUpload(e) {
+      const target = e.target;
+      const file = target.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const result = event.target?.result;
+          logoPreview.src = result;
+          logoPreview.style.display = 'block';
+          removeLogoBtn.style.display = 'inline-block';
+          // TODO: 实现添加Logo到二维码的功能
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+    
+    // 移除Logo
+    function removeLogo() {
+      logoPreview.src = '';
+      logoPreview.style.display = 'none';
+      removeLogoBtn.style.display = 'none';
+      logoUpload.value = '';
+      // TODO: 实现移除二维码中Logo的功能
+    }
+    
+    // 选项卡切换
+    function handleTabChange(tab) {
+      activeTab = tab;
+      
+      // 更新选项卡按钮状态
+      tabBtns.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.tab === tab) {
+          btn.classList.add('active');
+        }
+      });
+      
+      // 更新显示
+      updateTabDisplay();
+    }
+    
+    // 初始化事件监听
+    function initEventListeners() {
+      // 生成按钮
+      generateBtn.addEventListener('click', generateQRCode);
+      
+      // 清除按钮
+      clearBtn.addEventListener('click', clear);
+      
+      // 导出按钮
+      exportBtn.addEventListener('click', exportQRCode);
+      
+      // 选项卡切换
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          handleTabChange(btn.dataset.tab || 'png');
+        });
+      });
+      
+      // 尺寸滑块
+      sizeSlider.addEventListener('input', (e) => {
+        const value = e.target.value;
+        sizeValue.textContent = value;
+      });
+      
+      // 边距滑块
+      marginSlider.addEventListener('input', (e) => {
+        const value = e.target.value;
+        marginValue.textContent = value;
+      });
+      
+      // 数据类型切换
+      dataTypeTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          switchDataType(tab.dataset.type || 'text');
+        });
+      });
+      
+      // Logo上传
+      logoUpload.addEventListener('change', handleLogoUpload);
+      removeLogoBtn.addEventListener('click', removeLogo);
+      
+      // 实时生成（输入变化时延迟生成）
+      let debounceTimer;
+      function debounceGenerate() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(generateQRCode, 500);
+      }
+      
+      // 文本输入变化
+      textInput.addEventListener('input', debounceGenerate);
+      
+      // 联系方式输入变化
+      contactName.addEventListener('input', debounceGenerate);
+      contactPhone.addEventListener('input', debounceGenerate);
+      contactEmail.addEventListener('input', debounceGenerate);
+      contactCompany.addEventListener('input', debounceGenerate);
+      
+      // WiFi输入变化
+      wifiSsid.addEventListener('input', debounceGenerate);
+      wifiPassword.addEventListener('input', debounceGenerate);
+      wifiType.addEventListener('change', debounceGenerate);
+      
+      // 尺寸变化
+      sizeSlider.addEventListener('change', debounceGenerate);
+      
+      // 边距变化
+      marginSlider.addEventListener('change', debounceGenerate);
+      
+      // 颜色变化
+      darkColor.addEventListener('change', debounceGenerate);
+      lightColor.addEventListener('change', debounceGenerate);
+      
+      // 错误纠正级别变化
+      errorCorrection.addEventListener('change', debounceGenerate);
+      
+      // 回车键生成
+      textInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          generateQRCode();
+        }
+      });
+    }
+    
+    // 初始化
+    function init() {
+      initEventListeners();
+      generateQRCode(); // 初始生成
+    }
+    
+    init();
+  </script>
+</body>
+</html>

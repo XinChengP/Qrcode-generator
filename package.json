@@ -1,0 +1,31 @@
+{
+  "name": "qrcode-generator-component",
+  "version": "1.0.0",
+  "description": "A feature-rich TypeScript QR code generator component",
+  "main": "dist/qrcode-generator.umd.js",
+  "module": "dist/qrcode-generator.es.js",
+  "types": "dist/types/index.d.ts",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "build-demo": "vite build --mode demo",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "qrcode",
+    "typescript",
+    "component",
+    "generator"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/qrcode": "^1.5.5",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.11"
+  },
+  "dependencies": {
+    "qrcode": "^1.5.3"
+  }
+}
