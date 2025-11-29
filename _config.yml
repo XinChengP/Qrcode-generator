@@ -1,0 +1,46 @@
+# GitHub Pages 配置
+# 禁用 Jekyll 处理，确保静态文件直接部署
+plugins:
+  - jekyll-redirect-from
+  - jekyll-sitemap
+
+# 确保所有文件都被处理
+include:
+  - "*.html"
+  - "*.js"
+  - "*.css"
+  - "*.json"
+  - "*.xml"
+  - "*.txt"
+  - "assets/**/*"
+
+# 排除不需要的文件
+exclude:
+  - "*.md"
+  - "*.ts"
+  - "src/**/*"
+  - "node_modules/**/*"
+  - ".github/**/*"
+  - ".trae/**/*"
+  - "examples/**/*"
+  - "demo/**/*"
+
+# 设置基础URL（GitHub Pages会自动处理）
+baseurl: ""
+url: ""
+
+# 确保 MIME 类型正确
+markdown: kramdown
+highlighter: rouge
+
+# 强制 HTTPS
+enforce_ssl: true
+
+# 压缩 HTML
+compress_html:
+  clippings: all
+  comments: all
+  endings: all
+  startings: all
+  blanklines: false
+  profile: false

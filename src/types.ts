@@ -13,7 +13,12 @@ export enum QRCodeFormat {
 export enum QRCodeShape {
   SQUARE = 'square',
   ROUNDED = 'rounded',
-  CIRCLE = 'circle'
+  CIRCLE = 'circle',
+  DOT = 'dot',
+  STAR = 'star',
+  HEXAGON = 'hexagon',
+  DIAMOND = 'diamond',
+  TRIANGLE = 'triangle'
 }
 
 export interface QRCodeOptions {
@@ -22,10 +27,6 @@ export interface QRCodeOptions {
   color?: {
     dark?: string;
     light?: string;
-    gradient?: {
-      type?: 'linear' | 'radial';
-      colors?: string[];
-    };
   };
   margin?: number;
   scale?: number;
@@ -35,6 +36,18 @@ export interface QRCodeOptions {
   };
   shape?: QRCodeShape;
   cornerRadius?: number;
+  complexity?: number; // 复杂度级别 (1-10)
+  moduleSize?: number; // 模块大小百分比 (50-150)
+  moduleSpacing?: number; // 模块间距 (0-10)
+  randomness?: number; // 随机变化程度 (0-100)
+  animation?: {
+    enabled?: boolean;
+    type?: 'fade' | 'scale' | 'rotate' | 'bounce' | 'pulse';
+    duration?: number; // 动画持续时间(ms)
+    delay?: number; // 延迟时间(ms)
+    stagger?: number; // 模块间延迟(ms)
+    direction?: 'forward' | 'reverse' | 'alternate';
+  };
 }
 
 export interface QRCodeResult {

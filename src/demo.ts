@@ -1,5 +1,5 @@
 import { QRCodeGenerator } from './QrCodeGenerator';
-import { ErrorCorrectionLevel } from './types';
+import { ErrorCorrectionLevel, QRCodeOptions } from './types';
 
 // 初始化演示
 function initDemo() {
@@ -59,13 +59,23 @@ function initDemo() {
   const lightColor = document.getElementById('light-color') as HTMLInputElement;
   const errorCorrection = document.getElementById('error-correction') as HTMLSelectElement;
   const shapeSelect = document.getElementById('shape-select') as HTMLSelectElement;
-  const cornerRadiusSlider = document.getElementById('corner-radius-slider') as HTMLInputElement;
-  const cornerRadiusValue = document.getElementById('corner-radius-value') as HTMLSpanElement;
+const cornerRadiusSlider = document.getElementById('corner-radius-slider') as HTMLInputElement;
+const cornerRadiusValue = document.getElementById('corner-radius-value') as HTMLSpanElement;
+const moduleSizeSlider = document.getElementById('module-size-slider') as HTMLInputElement;
+const moduleSizeValue = document.getElementById('module-size-value') as HTMLSpanElement;
+const moduleSpacingSlider = document.getElementById('module-spacing-slider') as HTMLInputElement;
+const moduleSpacingValue = document.getElementById('module-spacing-value') as HTMLSpanElement;
+const randomnessSlider = document.getElementById('randomness-slider') as HTMLInputElement;
+  const randomnessValue = document.getElementById('randomness-value') as HTMLSpanElement;
+  const smartGradientCheckbox = document.getElementById('smart-gradient') as HTMLInputElement;
   const gradientType = document.getElementById('gradient-type') as HTMLSelectElement;
   const gradientColors = document.getElementById('gradient-colors') as HTMLDivElement;
   const gradientColorList = document.getElementById('gradient-color-list') as HTMLDivElement;
   const addGradientColorBtn = document.getElementById('add-gradient-color') as HTMLButtonElement;
   const removeGradientColorBtn = document.getElementById('remove-gradient-color') as HTMLButtonElement;
+  const complexitySlider = document.getElementById('complexity-slider') as HTMLInputElement;
+  const complexityValue = document.getElementById('complexity-value') as HTMLSpanElement;
+  const complexityDesc = document.getElementById('complexity-desc') as HTMLSpanElement;
   
   // Logo上传元素
   const logoUpload = document.getElementById('logo-upload') as HTMLInputElement;
@@ -86,15 +96,20 @@ function initDemo() {
   let currentDataType = 'text';
   
   // 保存当前配置
-  let currentConfig: any = {
-    size: 200,
-    margin: 4,
-    color: {
-      dark: '#000000',
-      light: '#ffffff'
-    },
-    errorCorrectionLevel: ErrorCorrectionLevel.MEDIUM
-  };
+  let currentConfig: QRCodeOptions = {
+  size: 200,
+  margin: 4,
+  color: {
+    dark: '#000000',
+    light: '#ffffff'
+  },
+  errorCorrectionLevel: ErrorCorrectionLevel.MEDIUM,
+  complexity: 5,
+  moduleSize: 100,
+  moduleSpacing: 0,
+  randomness: 0,
+  smartGradient: true
+};
   
   // 历史记录数据结构
   interface HistoryItem {
@@ -208,6 +223,25 @@ function initDemo() {
       shapeSelect.value = item.config.shape || 'square';
       cornerRadiusSlider.value = item.config.cornerRadius?.toString() || '4';
       cornerRadiusValue.textContent = item.config.cornerRadius?.toString() || '4';
+      moduleSizeSlider.value = item.config.moduleSize?.toString() || '100';
+      moduleSizeValue.textContent = item.config.moduleSize?.toString() || '100';
+      moduleSpacingSlider.value = item.config.moduleSpacing?.toString() || '0';
+      moduleSpacingValue.textContent = item.config.moduleSpacing?.toString() || '0';
+      
+      // 更新复杂度设置
+      complexitySlider.value = item.config.complexity?.toString() || '5';
+      complexityValue.textContent = item.config.complexity?.toString() || '5';
+      updateComplexityDescription(item.config.complexity || 5);
+      
+      // 恢复随机变化设置
+      if (item.config.randomness !== undefined) {
+        randomnessSlider.value = item.config.randomness.toString();
+        randomnessValue.textContent = item.config.randomness.toString();
+      }
+      // 恢复智能渐变设置
+      if (item.config.smartGradient !== undefined) {
+        smartGradientCheckbox.checked = item.config.smartGradient;
+      }
       
       // 更新渐变设置
       if (item.config.color.gradient) {
@@ -295,6 +329,23 @@ function initDemo() {
         qrcodeCanvas.style.display = 'block';
         break;
     }
+  }
+
+  // 更新复杂度描述
+  function updateComplexityDescription(value: number) {
+    const descriptions = {
+      1: '极简模式 - 最基础的二维码',
+      2: '简单模式 - 基本功能',
+      3: '简洁模式 - 轻量级设计',
+      4: '标准模式 - 平衡性能',
+      5: '标准复杂度 - 推荐设置',
+      6: '增强模式 - 更多细节',
+      7: '复杂模式 - 丰富样式',
+      8: '高级模式 - 精细设计',
+      9: '专业模式 - 复杂样式',
+      10: '极致模式 - 最高复杂度'
+    };
+    complexityDesc.textContent = descriptions[value as keyof typeof descriptions] || '标准复杂度';
   }
   
   // 获取当前输入的数据
@@ -399,7 +450,12 @@ function initDemo() {
           size: parseInt(sizeSlider.value) * 0.2
         } : undefined,
         shape: shapeSelect.value as any,
-        cornerRadius: parseInt(cornerRadiusSlider.value)
+        cornerRadius: parseInt(cornerRadiusSlider.value),
+        complexity: parseInt(complexitySlider.value),
+        moduleSize: parseInt(moduleSizeSlider.value),
+        moduleSpacing: parseInt(moduleSpacingSlider.value),
+        randomness: parseInt(randomnessSlider.value),
+      smartGradient: smartGradientCheckbox.checked
       };
       
       // 生成PNG
@@ -613,6 +669,14 @@ function initDemo() {
       const value = (e.target as HTMLInputElement).value;
       marginValue.textContent = value;
     });
+
+    // 复杂度滑块
+    complexitySlider.addEventListener('input', (e) => {
+      const value = (e.target as HTMLInputElement).value;
+      complexityValue.textContent = value;
+      updateComplexityDescription(parseInt(value));
+    });
+    complexitySlider.addEventListener('change', debounceGenerate);
     
     // 数据类型切换
     dataTypeTabs.forEach(tab => {
@@ -682,8 +746,32 @@ function initDemo() {
     cornerRadiusSlider.addEventListener('input', (e) => {
       const value = (e.target as HTMLInputElement).value;
       cornerRadiusValue.textContent = value;
+      generateQRCode();
     });
     cornerRadiusSlider.addEventListener('change', debounceGenerate);
+
+    // 模块大小滑块事件
+    moduleSizeSlider.addEventListener('input', (e) => {
+      moduleSizeValue.textContent = (e.target as HTMLInputElement).value;
+      generateQRCode();
+    });
+
+    // 模块间距滑块事件
+  moduleSpacingSlider.addEventListener('input', (e) => {
+    moduleSpacingValue.textContent = (e.target as HTMLInputElement).value;
+    generateQRCode();
+  });
+
+  // 随机变化滑块事件
+  randomnessSlider.addEventListener('input', (e) => {
+    randomnessValue.textContent = (e.target as HTMLInputElement).value;
+    generateQRCode();
+  });
+
+  // 智能渐变复选框事件
+  smartGradientCheckbox.addEventListener('change', () => {
+    generateQRCode();
+  });
     
     // 渐变类型变化
     gradientType.addEventListener('change', (e) => {

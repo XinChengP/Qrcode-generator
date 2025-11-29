@@ -331,6 +331,21 @@
       transform: scale(1.2);
     }
 
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      margin: 8px 0;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      margin-right: 8px;
+    }
+
+    .checkbox-group label {
+      margin: 0;
+      font-size: 14px;
+    }
+
     .slider-value {
       min-width: 60px;
       text-align: center;
@@ -677,7 +692,7 @@
                 type="text" 
                 id="text-input" 
                 class="form-input" 
-                value="https://example.com" 
+                value="" 
                 placeholder="请输入文本或URL..."
               >
             </div>
@@ -809,8 +824,13 @@
             <label class="form-label">形状设置</label>
             <select id="shape-select" class="select-input">
               <option value="square">正方形</option>
-              <option value="rounded">圆角</option>
+              <option value="rounded">圆角矩形</option>
               <option value="circle">圆形</option>
+              <option value="dot">圆点</option>
+              <option value="star">星形</option>
+              <option value="hexagon">六边形</option>
+              <option value="diamond">菱形</option>
+              <option value="triangle">三角形</option>
             </select>
           </div>
 
@@ -825,6 +845,52 @@
                 max="20" 
                 value="4"
               >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="module-size-slider">模块大小: <span id="module-size-value">100</span>%</label>
+            <div class="slider-group">
+              <input 
+                type="range" 
+                id="module-size-slider" 
+                class="slider" 
+                min="50" 
+                max="150" 
+                value="100"
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="module-spacing-slider">模块间距: <span id="module-spacing-value">0</span>px</label>
+            <div class="slider-group">
+              <input 
+                type="range" 
+                id="module-spacing-slider" 
+                class="slider" 
+                min="0" 
+                max="10" 
+                value="0"
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="randomness-slider">随机变化: <span id="randomness-value">0</span>%</label>
+            <div class="slider-group">
+              <input 
+                type="range" 
+                id="randomness-slider" 
+                class="slider" 
+                min="0" 
+                max="100" 
+                value="0"
+              >
+            </div>
+            <div class="checkbox-group" style="margin-top: 8px;">
+              <input type="checkbox" id="smart-gradient" checked>
+              <label for="smart-gradient">智能渐变优化</label>
             </div>
           </div>
 
@@ -893,6 +959,23 @@
               <option value="Q">中高 (25%)</option>
               <option value="H">高 (30%)</option>
             </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="complexity-slider">二维码复杂度: <span id="complexity-value">5</span></label>
+            <div class="slider-group">
+              <input 
+                type="range" 
+                id="complexity-slider" 
+                class="slider" 
+                min="1" 
+                max="10" 
+                value="5"
+              >
+            </div>
+            <div class="complexity-info" style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 5px;">
+              <span id="complexity-desc">标准复杂度</span>
+            </div>
           </div>
 
           <div class="form-group">

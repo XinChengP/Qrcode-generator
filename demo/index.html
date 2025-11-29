@@ -299,6 +299,56 @@
       transform: scale(1.05);
     }
 
+    /* 形状控制样式 */
+    .shape-controls {
+      background: var(--background-color);
+      border-radius: var(--border-radius);
+      padding: 16px;
+      border: 1px solid var(--border-color);
+    }
+
+    .shape-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .shape-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-label-small {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      min-width: 80px;
+      font-weight: 500;
+    }
+
+    .animation-controls {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 6px;
+      padding: 12px;
+    }
+
+    .animation-controls .shape-row {
+      margin-bottom: 8px;
+    }
+
+    .animation-controls .slider {
+      flex: 1;
+      margin: 0 8px;
+    }
+
+    .animation-controls span {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      min-width: 30px;
+    }
+
     /* 滑块样式 */
     .slider-group {
       display: flex;
@@ -675,6 +725,103 @@
           </div>
 
           <div class="form-group">
+            <label class="form-label" for="complexity-slider">复杂度: <span id="complexity-value">5</span></label>
+            <div class="slider-group">
+              <input 
+                type="range" 
+                id="complexity-slider" 
+                class="slider" 
+                min="1" 
+                max="10" 
+                value="5"
+              >
+            </div>
+            <div class="complexity-desc" id="complexity-desc" style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">标准复杂度</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="module-size-slider">模块大小: <span id="module-size-value">100</span>%</label>
+            <div class="slider-group">
+              <input 
+                type="range" 
+                id="module-size-slider" 
+                class="slider" 
+                min="50" 
+                max="150" 
+                value="100"
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="randomness-slider">随机变化: <span id="randomness-value">0</span></label>
+            <div class="slider-group">
+              <input 
+                type="range" 
+                id="randomness-slider" 
+                class="slider" 
+                min="0" 
+                max="100" 
+                value="0"
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">形状设置</label>
+            <div class="shape-controls">
+              <div class="shape-row">
+                <label class="form-label-small">模块形状:</label>
+                <select id="module-shape" class="select-input">
+                  <option value="square">方形</option>
+                  <option value="circle">圆形</option>
+                  <option value="rounded">圆角矩形</option>
+                  <option value="star">星形</option>
+                  <option value="hexagon">六边形</option>
+                  <option value="diamond">菱形</option>
+                  <option value="triangle">三角形</option>
+                </select>
+              </div>
+              <div class="shape-row">
+                <label class="form-label-small">动画效果:</label>
+                <select id="animation-type" class="select-input">
+                  <option value="none">无动画</option>
+                  <option value="fade">淡入</option>
+                  <option value="scale">缩放</option>
+                  <option value="rotate">旋转</option>
+                  <option value="bounce">弹跳</option>
+                  <option value="pulse">脉冲</option>
+                </select>
+              </div>
+              <div class="animation-controls" id="animation-controls" style="display: none;">
+                <div class="shape-row">
+                  <label class="form-label-small">持续时间 (秒):</label>
+                  <input type="range" id="animation-duration" class="slider" min="0.5" max="3" step="0.1" value="1">
+                  <span id="duration-value">1.0</span>s
+                </div>
+                <div class="shape-row">
+                  <label class="form-label-small">延迟 (秒):</label>
+                  <input type="range" id="animation-delay" class="slider" min="0" max="1" step="0.1" value="0">
+                  <span id="delay-value">0.0</span>s
+                </div>
+                <div class="shape-row">
+                  <label class="form-label-small">间隔 (秒):</label>
+                  <input type="range" id="animation-stagger" class="slider" min="0" max="0.2" step="0.01" value="0.05">
+                  <span id="stagger-value">0.05</span>s
+                </div>
+                <div class="shape-row">
+                  <label class="form-label-small">方向:</label>
+                  <select id="animation-direction" class="select-input">
+                    <option value="forward">正向</option>
+                    <option value="reverse">反向</option>
+                    <option value="alternate">交替</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
             <label class="form-label">中心Logo</label>
             <div class="logo-upload">
               <input type="file" id="logo-upload" accept="image/*">
@@ -790,10 +937,31 @@
     const lightColor = document.getElementById('light-color');
     const errorCorrection = document.getElementById('error-correction');
     
+    // 复杂度控制元素
+    const complexitySlider = document.getElementById('complexity-slider');
+    const complexityValue = document.getElementById('complexity-value');
+    const complexityDesc = document.getElementById('complexity-desc');
+    const moduleSizeSlider = document.getElementById('module-size-slider');
+    const moduleSizeValue = document.getElementById('module-size-value');
+    const randomnessSlider = document.getElementById('randomness-slider');
+    const randomnessValue = document.getElementById('randomness-value');
+    
     // Logo上传元素
     const logoUpload = document.getElementById('logo-upload');
     const logoPreview = document.getElementById('logo-preview');
     const removeLogoBtn = document.getElementById('remove-logo');
+    
+    // 形状和动画控制元素
+    const moduleShape = document.getElementById('module-shape');
+    const animationType = document.getElementById('animation-type');
+    const animationControls = document.getElementById('animation-controls');
+    const animationDuration = document.getElementById('animation-duration');
+    const durationValue = document.getElementById('duration-value');
+    const animationDelay = document.getElementById('animation-delay');
+    const delayValue = document.getElementById('delay-value');
+    const animationStagger = document.getElementById('animation-stagger');
+    const staggerValue = document.getElementById('stagger-value');
+    const animationDirection = document.getElementById('animation-direction');
     
     // 选项卡元素
     const tabBtns = document.querySelectorAll('.tab-btn');
@@ -812,7 +980,19 @@
         dark: '#000000',
         light: '#ffffff'
       },
-      errorCorrectionLevel: ErrorCorrectionLevel.MEDIUM
+      errorCorrectionLevel: ErrorCorrectionLevel.MEDIUM,
+      shape: 'square',
+      complexity: 5,
+      moduleSize: 100,
+      randomness: 0,
+      animation: {
+        enabled: false,
+        type: 'fade',
+        duration: 1000,
+        delay: 0,
+        stagger: 50,
+        direction: 'forward'
+      }
     };
     
     // 显示加载状态
@@ -835,6 +1015,23 @@
         </svg>
         生成二维码
       `;
+    }
+    
+    // 更新复杂度描述
+    function updateComplexityDescription(value) {
+      const descriptions = {
+        1: '极简模式 - 减少细节，简化二维码',
+        2: '极简模式 - 减少细节，简化二维码',
+        3: '简单模式 - 轻微增强',
+        4: '简单模式 - 轻微增强',
+        5: '标准模式 - 默认效果',
+        6: '标准模式 - 默认效果',
+        7: '复杂模式 - 增强细节',
+        8: '复杂模式 - 增强细节',
+        9: '极致模式 - 最丰富的视觉效果',
+        10: '极致模式 - 最丰富的视觉效果'
+      };
+      complexityDesc.textContent = descriptions[value] || '标准复杂度';
     }
     
     // 更新选项卡显示
@@ -916,6 +1113,18 @@
             light: lightColor.value
           },
           errorCorrectionLevel: errorCorrection.value,
+          shape: moduleShape.value,
+          complexity: parseInt(complexitySlider.value),
+          moduleSize: parseInt(moduleSizeSlider.value),
+          randomness: parseInt(randomnessSlider.value),
+          animation: {
+            enabled: animationType.value !== 'none',
+            type: animationType.value,
+            duration: parseFloat(animationDuration.value) * 1000,
+            delay: parseFloat(animationDelay.value) * 1000,
+            stagger: parseFloat(animationStagger.value) * 1000,
+            direction: animationDirection.value
+          },
           logo: logoPreview.src ? {
             src: logoPreview.src,
             size: parseInt(sizeSlider.value) * 0.2
@@ -1056,6 +1265,20 @@
       }
     }
     
+    // 动画类型变化处理
+    function handleAnimationTypeChange() {
+      const hasAnimation = animationType.value !== 'none';
+      animationControls.style.display = hasAnimation ? 'block' : 'none';
+      debounceGenerate();
+    }
+    
+    // 更新动画数值显示
+    function updateAnimationValues() {
+      durationValue.textContent = parseFloat(animationDuration.value).toFixed(1);
+      delayValue.textContent = parseFloat(animationDelay.value).toFixed(1);
+      staggerValue.textContent = parseFloat(animationStagger.value).toFixed(2);
+    }
+    
     // 移除Logo
     function removeLogo() {
       logoPreview.src = '';
@@ -1122,6 +1345,23 @@
       logoUpload.addEventListener('change', handleLogoUpload);
       removeLogoBtn.addEventListener('click', removeLogo);
       
+      // 形状和动画控制
+      moduleShape.addEventListener('change', debounceGenerate);
+      animationType.addEventListener('change', handleAnimationTypeChange);
+      animationDuration.addEventListener('input', () => {
+        updateAnimationValues();
+        debounceGenerate();
+      });
+      animationDelay.addEventListener('input', () => {
+        updateAnimationValues();
+        debounceGenerate();
+      });
+      animationStagger.addEventListener('input', () => {
+        updateAnimationValues();
+        debounceGenerate();
+      });
+      animationDirection.addEventListener('change', debounceGenerate);
+      
       // 实时生成（输入变化时延迟生成）
       let debounceTimer;
       function debounceGenerate() {
@@ -1156,6 +1396,28 @@
       // 错误纠正级别变化
       errorCorrection.addEventListener('change', debounceGenerate);
       
+      // 复杂度控制变化
+      complexitySlider.addEventListener('input', (e) => {
+        const value = e.target.value;
+        complexityValue.textContent = value;
+        updateComplexityDescription(parseInt(value));
+      });
+      complexitySlider.addEventListener('change', debounceGenerate);
+      
+      // 模块大小变化
+      moduleSizeSlider.addEventListener('input', (e) => {
+        const value = e.target.value;
+        moduleSizeValue.textContent = value;
+      });
+      moduleSizeSlider.addEventListener('change', debounceGenerate);
+      
+      // 随机变化变化
+      randomnessSlider.addEventListener('input', (e) => {
+        const value = e.target.value;
+        randomnessValue.textContent = value;
+      });
+      randomnessSlider.addEventListener('change', debounceGenerate);
+      
       // 回车键生成
       textInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
@@ -1167,7 +1429,10 @@
     // 初始化
     function init() {
       initEventListeners();
+      updateAnimationValues(); // 初始化动画数值显示
+      handleAnimationTypeChange(); // 初始化动画控制显示
       generateQRCode(); // 初始生成
+      updateComplexityDescription(parseInt(complexitySlider.value)); // 初始化复杂度描述
     }
     
     init();
